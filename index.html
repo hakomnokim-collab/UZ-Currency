@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UZ Currency 💱</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+
+    background:
+        radial-gradient(circle at 10% 10%, #8e2de2, transparent 35%),
+        radial-gradient(circle at 90% 90%, #4a00e0, transparent 35%),
+        #12001f;
+}
+    background: white;
+    color: #222;
+    border: 1px solid #ddd;
+}
+
+body.light .card * {
+    color: #222;
+}
+
+body.light input,
+body.light select {
+    background: #f7f7f7;
+    color: #222;
+    border: 1px solid #ddd;
+}
+
+body.light .calculate {
+    background: #5b0aa8;
+    color: white;
+}
+
+body.light .refresh {
+    background: #eeeeee;
+    color: #222;
+    border: 1px solid #ccc;
+}
+
+body.light .result,
+body.light .history {
+    background: #eeeeee;
+    color: #222;
+}
+
+body.light .currency {
+    background: #f2f2f2;
+    color: #222;
+}
+
+body.light .section-title,
+body.light .currency-rate {
+    color: #222;
+}
+    width: 520px;
+    max-width: 100%;
+    padding: 30px;
+    text-align: center;
+
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 30px;
+
+    box-shadow: 0 0 45px rgba(0,0,0,0.35);
+    backdrop-filter: blur(18px);
+}
+
+.logo {
+    font-size: 55px;
+}
+
+h1 {
+    margin: 5px 0;
+    font-size: 40px;
+}
+
+.subtitle {
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 12px;
+
+    border: none;
+    border-radius: 15px;
+    outline: none;
+
+    font-size: 17px;
+}
+
+input {
+    text-align: center;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+
+    border: none;
+    border-radius: 15px;
+
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.calculate {
+    background: white;
+    color: #5b0aa8;
+}
+
+.refresh {
+    margin-top: 10px;
+    background: rgba(255,255,255,0.13);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.result {
+    margin-top: 20px;
+    padding: 20px;
+
+    border-radius: 20px;
+    background: rgba(0,0,0,0.25);
+
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.section-title {
+    margin-top: 22px;
+    margin-bottom: 12px;
+
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.currency-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.currency {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 13px 15px;
+
+    background: rgba(255,255,255,0.08);
+    border-radius: 15px;
+
+    text-align: left;
+}
+
+.currency-rate {
+    text-align: right;
+}
+
+.up {
+    color: #65ff9b;
+}
+
+.down {
+    color: #ff7b91;
+}
+
+.same {
+    color: #ffd86b;
+}
+
+.history {
+    margin-top: 15px;
+    padding: 15px;
+
+    background: rgba(0,0,0,0.18);
+    border-radius: 15px;
+
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.update {
+    margin-top: 12px;
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+#search {
+    margin-bottom: 18px;
+}
+
+</style>
+</head>
+
+<body>
+<a href="https://t.me/aperatir"
+   target="_blank"
+   style="
+       position: fixed;
+       top: 15px;
+       right: 20px;
+       color: white;
+       text-decoration: none;
+       font-weight: bold;
+       font-size: 14px;
+       z-index: 9999;
+   ">
+   🐶 Murojaat uchun: @aperatir
+</a>
+<div class="card">
+
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+<button onclick="copyRates()" style="width:50%; background:rgba(255,255,255,0.15); color:white;">📋 Nusxalash</button>
+</div><div class="logo">💱</div>
+
+<h1>UZ Currency</h1>
+
+<div class="subtitle">
+O‘zbekiston valyuta kurslari 🇺🇿
+</div>
+
+<input
+    type="text"
+    id="search"
+    placeholder="🔎 Valyuta qidirish..."
+>
+
+<div class="section-title">
+💰 Valyuta konvertori
+</div>
+
+<input
+    id="amount"
+    type="number"
+    placeholder="Summani kiriting"
+    min="0"
+>
+
+<select id="fromCurrency">
+
+<option value="UZS">🇺🇿 UZS — So‘m</option>
+<option value="USD">🇺🇸 USD — Dollar</option>
+<option value="EUR">🇪🇺 EUR — Yevro</option>
+<option value="RUB">🇷🇺 RUB — Rubl</option>
+<option value="GBP">🇬🇧 GBP — Funt</option>
+
+</select>
+
+<select id="toCurrency">
+
+<option value="USD">🇺🇸 USD — Dollar</option>
+<option value="UZS">🇺🇿 UZS — So‘m</option>
+<option value="EUR">🇪🇺 EUR — Yevro</option>
+<option value="RUB">🇷🇺 RUB — Rubl</option>
+<option value="GBP">🇬🇧 GBP — Funt</option>
+
+</select>
+
+<button class="calculate" onclick="convert()">
+Hisoblash 💰
+</button>
+
+<button class="refresh" onclick="loadRates()">
+🔄 Kurslarni yangilash
+</button>
+
+<div class="result" id="result">
+Natija shu yerda chiqadi
+</div>
+
+<div class="section-title">
+📊 Bugungi kurslar
+</div>
+
+<div class="currency-list" id="currencyList">
+Kurslar yuklanmoqda...
+</div>
+
+<div class="section-title">
+📈 Kurs o‘zgarishi
+</div>
+
+<div class="history" id="history">
+Hozircha ma’lumot yo‘q.
+</div>
+
+<div class="update" id="update">
+Kurs sanasi olinmoqda...
+</div>
+
+</div>
+<script>
+
+let rates = {
+    UZS: 1
+};
+
+let oldRates =
+    JSON.parse(localStorage.getItem("uzCurrencyRates")) || null;
+
+
+async function loadRates() {
+
+    const list = document.getElementById("currencyList");
+    const history = document.getElementById("history");
+    const update = document.getElementById("update");
+
+    list.innerHTML = "⏳ Kurslar yangilanmoqda...";
+
+    try {
+
+        const response = await fetch(
+            "https://cbu.uz/uz/arkhiv-kursov-valyut/json/"
+        );
+
+        if (!response.ok) {
+            throw new Error("Kurslarni olib bo‘lmadi");
+        }
+
+        const data = await response.json();
+
+        rates = {
+            UZS: 1
+        };
+
+        data.forEach(item => {
+
+            if (
+                item.Ccy === "USD" ||
+                item.Ccy === "EUR" ||
+                item.Ccy === "RUB" ||
+                item.Ccy === "GBP"
+            ) {
+                rates[item.Ccy] =
+                    Number(item.Rate) /
+                    Number(item.Nominal);
+            }
+
+        });
+
+        showCurrencies(data);
+        showHistory(data);
+
+        update.innerHTML =
+            "🕐 Kurs sanasi: " + data[0].Date;
+
+    } catch (error) {
+
+        list.innerHTML =
+            "❌ Kurslarni yuklab bo‘lmadi.";
+
+        history.innerHTML =
+            "Internet aloqasini tekshiring.";
+
+    }
+}
+
+
+function showCurrencies(data) {
+
+    const codes = ["USD", "EUR", "RUB", "GBP"];
+
+    let html = "";
+
+    codes.forEach(code => {
+
+        const item =
+            data.find(x => x.Ccy === code);
+
+        if (!item) return;
+
+        let arrow = "→";
+        let className = "same";
+
+        if (oldRates && oldRates[code]) {
+
+            const current =
+                Number(item.Rate) /
+                Number(item.Nominal);
+
+            const old =
+                Number(oldRates[code]);
+
+            if (current > old) {
+                arrow = "↑";
+                className = "up";
+            }
+
+            if (current < old) {
+                arrow = "↓";
+                className = "down";
+            }
+        }
+
+        html += `
+            <div class="currency">
+
+                <div>
+                    <b>${getFlag(code)} ${code}</b>
+                </div>
+
+                <div class="currency-rate">
+                    ${Number(item.Rate).toLocaleString("uz-UZ")}
+                    UZS
+
+                    <span class="${className}">
+                        ${arrow}
+                    </span>
+                </div>
+
+            </div>
+        `;
+
+    });
+
+    document.getElementById("currencyList").innerHTML = html;
+}
+
+
+function getFlag(code) {
+
+    if (code === "USD") return "🇺🇸";
+    if (code === "EUR") return "🇪🇺";
+    if (code === "RUB") return "🇷🇺";
+    if (code === "GBP") return "🇬🇧";
+
+    return "💱";
+}
+
+
+function showHistory(data) {
+
+    if (!oldRates) {
+
+        document.getElementById("history").innerHTML =
+            "📌 Birinchi kurs yuklandi.<br>" +
+            "Keyingi yangilashda o‘zgarish ko‘rinadi.";
+
+        return;
+    }
+
+    let text =
+        "Oxirgi kurs bilan taqqoslash:<br><br>";
+
+    ["USD", "EUR", "RUB", "GBP"].forEach(code => {
+
+        const item =
+            data.find(x => x.Ccy === code);
+
+        if (!item) return;
+
+        const current =
+            Number(item.Rate) /
+            Number(item.Nominal);
+
+        const old =
+            Number(oldRates[code]);
+
+        const difference =
+            current - old;
+
+        let symbol = "→";
+
+        if (difference > 0) symbol = "↑";
+        if (difference < 0) symbol = "↓";
+
+        text +=
+            `${code}: ${symbol} ` +
+            Math.abs(difference).toFixed(2) +
+            " UZS<br>";
+
+    });
+
+    document.getElementById("history").innerHTML = text;
+}
+
+
+function convert() {
+
+    const amount =
+        Number(document.getElementById("amount").value);
+
+    const from =
+        document.getElementById("fromCurrency").value;
+
+    const to =
+        document.getElementById("toCurrency").value;
+
+    if (amount <= 0) {
+
+        document.getElementById("result").innerHTML =
+            "⚠️ Summani kiriting";
+
+        return;
+    }
+
+    if (!rates[from] || !rates[to]) {
+
+        document.getElementById("result").innerHTML =
+            "⏳ Kurslar yuklanmoqda...";
+
+        return;
+    }
+
+    const inUZS =
+        amount * rates[from];
+
+    const result =
+        inUZS / rates[to];
+
+    document.getElementById("result").innerHTML =
+        result.toLocaleString("uz-UZ", {
+            maximumFractionDigits: 2
+        }) + " " + to;
+}
+
+
+function searchCurrency() {
+
+    const search =
+        document.getElementById("search").value.toLowerCase();
+
+    const currencies =
+        document.querySelectorAll(".currency");
+
+    currencies.forEach(currency => {
+
+        const text =
+            currency.innerText.toLowerCase();
+
+        if (text.includes(search)) {
+            currency.style.display = "flex";
+        } else {
+            currency.style.display = "none";
+        }
+
+    });
+}
+
+
+document.getElementById("search").addEventListener(
+    "input",
+    searchCurrency
+);
+
+
+async function saveCurrentRates() {
+
+    const data = await fetch(
+        "https://cbu.uz/uz/arkhiv-kursov-valyut/json/"
+    ).then(r => r.json());
+
+    const saved = {};
+
+    ["USD", "EUR", "RUB", "GBP"].forEach(code => {
+
+        const item =
+            data.find(x => x.Ccy === code);
+
+        if (item) {
+            saved[code] =
+                Number(item.Rate) /
+                Number(item.Nominal);
+        }
+
+    });
+
+    localStorage.setItem(
+        "uzCurrencyRates",
+        JSON.stringify(saved)
+    );
+
+    oldRates = saved;
+}
+
+
+loadRates();
+}
+
+function copyRates() {
+    const text = document.getElementById("currencyList").innerText;
+    navigator.clipboard.writeText(text);
+    alert("📋 Kurslar nusxalandi!");
+}
+</script>
+
+</body>
+</html>
