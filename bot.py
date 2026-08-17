@@ -1,15 +1,33 @@
 import os
 import httpx
+
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+)
 
 CBU_URL = "https://cbu.uz/uz/arkhiv-kursov-valyut/json/"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🇺🇿 UZ Currency botiga xush kelibsiz!\n\n"
-        "💱 Kurslarni ko‘rish uchun /kurs buyrug‘ini bosing."
+        "🇺🇿 Assalomu alaykum!\n\n"
+        "💱 UZ Currency botiga xush kelibsiz!\n\n"
+        "📊 Valyuta kurslarini ko‘rish uchun /kurs buyrug‘ini yuboring.\n"
+        "ℹ️ Yordam uchun /help buyrug‘ini yuboring."
+    )
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "📚 Bot imkoniyatlari:\n\n"
+        "💱 /kurs — bugungi valyuta kurslari\n"
+        "💵 /kurs USD — dollar kursi\n"
+        "💶 /kurs EUR — yevro kursi\n"
+        "₽ /kurs RUB — rubl kursi\n"
+        "💷 /kurs GBP — funt kursi"
     )
 
 
@@ -20,31 +38,73 @@ async def kurs(update: Update, context: ContextTypes.DEFAULT_TYPE):
             response.raise_for_status()
             data = response.json()
 
-        kerakli = ["USD", "EUR", "RUB", "GBP"]
+        currencies = {
+            "USD": "🇺🇸 Dollar",
+            "EUR": "🇪🇺 Yevro",
+            "RUB": "🇷🇺 Rubl",
+            "GBP": "🇬🇧 Funt",
+        }
 
-        text = "💱 O‘zbekiston valyuta kurslari:\n\n"
+        # /kurs USD kabi so‘rov
+        if context.args:
+            code = context.args[0].upper()
 
-        for item in data:
-            if item["Ccy"] in kerakli:
-                text += (
-                    f"💵 {item['Ccy']}: "
-                    f"{item['Rate']} so‘m\n"
+            found = next(
+                (item for item in data if item.get("Ccy") == code),
+                None
+            )
+
+            if not found:
+                await update.message.reply_text(
+                    "❌ Bu valyuta topilmadi.\n\n"
+                    "Masalan: /kurs USD"
                 )
+                return
 
-        await update.message.reply_text(text)
+            await update.message.reply_text(
+                f"💱 {found['CcyNm_UZ']} ({code})\n\n"
+                f"🇺🇿 1 {code} = {found['Rate']} so‘m\n\n"
+                f"📅 Sana: {found['Date']}"
+            )
+            return
+
+        # Barcha asosiy kurslar
+        text = "🇺🇿 <b>O‘zbekiston Markaziy banki kurslari</b>\n\n"
+
+        for code, name in currencies.items():
+            found = next(
+                (item for item in data if item.get("Ccy") == code),
+                None
+            )
+
+            if found:
+                text += f"{name}: <b>{found['Rate']} so‘m</b>\n"
+
+        if data:
+            text += f"\n📅 Sana: {data[0]['Date']}"
+
+        await update.message.reply_text(
+            text,
+            parse_mode="HTML"
+        )
 
     except Exception:
         await update.message.reply_text(
-            "❌ Kurslarni olishda xatolik yuz berdi."
+            "⚠️ Kurslarni olishda xatolik yuz berdi.\n"
+            "Birozdan keyin qayta urinib ko‘ring."
         )
 
 
 def main():
-    token = os.environ["TELEGRAM_BOT_TOKEN"]
+    token = os.getenv("BOT_TOKEN")
+
+    if not token:
+        raise RuntimeError("BOT_TOKEN topilmadi")
 
     app = Application.builder().token(token).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("kurs", kurs))
 
     print("🤖 Bot ishga tushdi...")
